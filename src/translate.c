@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Remove spaces in strings
 char *trim(char *str) {
   size_t len = strlen(str);
   size_t charc = 0;
@@ -35,6 +36,7 @@ char *trim(char *str) {
   return result;
 }
 
+// Translate a binary string to ascii
 char *transb(const char *bstr) {
   char *trimmed_str = trim((char *)bstr);
 
@@ -76,6 +78,7 @@ char *transb(const char *bstr) {
   return result;
 }
 
+// Translate a hexadecimal string to ascii
 char *transx(char *xstr) {
   char *str = trim(xstr); // Trim the input string
 

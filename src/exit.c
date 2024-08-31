@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Exit with a specific code and print explanation
 void tb_exit(int code) {
   switch (code) {
   case TB_SUCCESS:
