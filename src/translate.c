@@ -3,44 +3,64 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *transb(const char *bstr) {
-
-  size_t len = strlen(bstr);
-
-  // Estimate character count by considering spaces
+char *trim(char *str) {
+  size_t len = strlen(str);
   size_t charc = 0;
+
+  // Calculate actual character length excluding spaces
   for (size_t i = 0; i < len; i++) {
-    if (bstr[i] != ' ') {
+    if (str[i] != ' ') {
       charc++;
     }
   }
 
-  // Check if binary string length is a multiple of 8
-  if (charc % 8 != 0) {
-    tb_exit(TB_WRONG_STR_LEN);
-  }
-
-  charc = charc / 8;
-
-  // Allocate enough space for the result string + null terminator
+  // Allocate memory for the result string plus null terminator
   char *result = malloc(charc + 1);
   if (!result) {
     tb_exit(TB_FAILURE); // Handle memory allocation failure
   }
 
-  // Loop through the binary string and process each byte
-  for (size_t x = 0, byteIndex = 0; x < charc; x++, byteIndex += 9) {
-    // Allocate space for 8 bits + null terminator
-    char bytes[9] = {0};
-    size_t bitPos = 0;
+  size_t cpos = 0;
 
-    // Extract 8 bits and skip spaces
-    while (bitPos < 8) {
-      if (*bstr != ' ') {
-        bytes[bitPos++] = *bstr;
-      }
-      bstr++;
+  // Copy characters from str to result, skipping spaces
+  for (size_t x = 0; x < len; x++) {
+    if (str[x] != ' ') {
+      result[cpos++] = str[x];
     }
+  }
+
+  // Add null terminator
+  result[charc] = '\0';
+
+  return result;
+}
+
+char *transb(const char *bstr) {
+  char *trimmed_str = trim((char *)bstr);
+
+  size_t len = strlen(trimmed_str);
+
+  // Check if binary string length is a multiple of 8
+  if (len % 8 != 0) {
+    free(trimmed_str);
+    tb_exit(TB_WRONG_STR_LEN);
+  }
+
+  size_t charc = len / 8;
+
+  // Allocate enough space for the result string + null terminator
+  char *result = malloc(charc + 1);
+  if (!result) {
+    free(trimmed_str);
+    tb_exit(TB_FAILURE); // Handle memory allocation failure
+  }
+
+  // Loop through the binary string and process each byte
+  for (size_t x = 0; x < charc; x++) {
+    char bytes[9] = {0}; // Allocate space for 8 bits + null terminator
+
+    // Extract 8 bits
+    strncpy(bytes, trimmed_str + x * 8, 8);
 
     // Convert the binary byte to a character
     char character = (char)strtol(bytes, NULL, 2);
@@ -52,7 +72,47 @@ char *transb(const char *bstr) {
   // Null-terminate the result string
   result[charc] = '\0';
 
+  free(trimmed_str); // Free the trimmed string
   return result;
 }
 
-char *transx(char *xstr) { return ""; }
+char *transx(char *xstr) {
+  char *str = trim(xstr); // Trim the input string
+
+  size_t len = strlen(str);
+
+  // Check if hexadecimal string length is a multiple of 2
+  if (len % 2 != 0) {
+    free(str);
+    tb_exit(TB_WRONG_STR_LEN);
+  }
+
+  size_t charc = len / 2;
+
+  // Allocate enough space for the result string + null terminator
+  char *result = malloc(charc + 1);
+  if (!result) {
+    free(str);
+    tb_exit(TB_FAILURE); // Handle memory allocation failure
+  }
+
+  // Loop through the hexadecimal string and process each byte
+  for (size_t x = 0; x < charc; x++) {
+    char bytes[3] = {0}; // Allocate space for 2 hex digits + null terminator
+
+    // Extract 2 hex digits
+    strncpy(bytes, str + x * 2, 2);
+
+    // Convert the hex byte to a character
+    char character = (char)strtol(bytes, NULL, 16);
+
+    // Add character to the result string
+    result[x] = character;
+  }
+
+  // Null-terminate the result string
+  result[charc] = '\0';
+
+  free(str); // Free the trimmed string
+  return result;
+}
